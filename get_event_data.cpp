@@ -43,10 +43,10 @@ int main(int argc, char* argv[]){
 
   int dataset = 3615;
 
-  TString dir = "/storage/gpfs_data/cuore/users/shared_scratch/super_reduced/";
+  TString dir = "/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/super_reduced/";
   TString filename_bkg,filename_cal;
   //int runs [58];
-  QChain ch("qtree");
+  QChain ch("qredtree");
   /*for(int i=0;i<58;i++)
     {
       cout<<"Working on run "<<351032+i<<endl;
@@ -62,26 +62,28 @@ int main(int argc, char* argv[]){
 
   //TODO: Figure out how to combine cal and bkg files
 
-  filename_bkg.Form("%s/SuperReduced_Background_ds%d.root",dir.Data(),dataset);
-  //filename_cal.Form("%s/SuperReduced_Calibration_ds%d.root",dir.Data(),dataset);
+  filename_bkg.Form("%s/SuperReduced_Background_NoPCACut_ds%d.root",dir.Data(),dataset);
+  filename_cal.Form("%s/SuperReduced_Calibration_NoPCACut_ds%d.root",dir.Data(),dataset);
   int nAdded1 = ch.Add(filename_bkg.Data());
-  //int nAdded2 = ch.Add(filename_cal.Data());
+  int nAdded2 = ch.Add(filename_cal.Data());
 
-  //if(nAdded1==0 || nAdded2==0){cout<<"Could not add files"<<endl;}
-  if(nAdded1==0){cout<<"Could not add files"<<endl;}
+  if(nAdded1==0 || nAdded2==0){cout<<"Could not add files"<<endl;}
+  //if(nAdded1==0){cout<<"Could not add files"<<endl;}
 
   int tree_channel, multiplicity;
   double energy;
-  int channelV [2];
+  //int channelV [2];
+  int *channelV = new int [988]; 
 
   //Accessing tree branches
   ch.SetBranchAddress("Channel", &tree_channel);
-  ch.SetBranchAddress("Energy", &energy);
+  ch.SetBranchAddress("TotalEnergy", &energy);
   ch.SetBranchAddress("Multiplicity", &multiplicity);
-  ch.SetBranchAddress("ChannelV", &channelV);
+  //ch.SetBranchAddress("ChannelV", &channelV);
+  ch.SetBranchAddress("ChannelV", channelV);
 
   int numEntries = ch.GetEntries();
-
+  cout<<"Number of entries are "<<numEntries<<endl;
   string fname;
   fname = "channel_pairs.csv";
   
@@ -106,35 +108,42 @@ int main(int argc, char* argv[]){
   else
     cout<<"Could not open the file\n";
   
-  int channel, near_channel, far_channel;
-  int near_event [988];
-  int far_event [988];
+  int channel=0, near_channel=0, far_channel=0;
+  //int near_event [988];
+  //int far_event [988];
+  int near_events=0;
+  int far_events=0;
 
-  for(int i=0;i<988;i++)
+  for(int i=0;i<989;i++)
     {
-      content[i][0] = channel;
-      content[i][1] = near_channel;
-      content[i][2] = far_channel;
-      
+      channel = stoi(content[i][0]);
+      near_channel = stoi(content[i][1]);
+      far_channel = stoi(content[i][2]);
+
+      cout<<"Working on set "<<channel<<" "<<near_channel<<" "<<far_channel<<endl;
       for(int e=0;e<numEntries;e++)
 	{
 	  ch.GetEntry(e);
+	  //cout<<"Working on tree_channel "<<tree_channel<<" multiplicity "<<multiplicity<<" energy "<<energy<<endl;
 	  if(multiplicity==2)
 	    {
-	      if(energy>4000) //TODO: Better way to check for alpha events
+	      if(energy>5000 || energy<200) //TODO: Better way to check for alpha events
 		{
 		  if(channel==tree_channel && channelV[1]==near_channel)
 		    {
-		      near_event[i]++;
+		      near_events++;
 		    }
 		  if(channel==tree_channel && channelV[1]==far_channel)
 		    {
-		      far_event[i]++;
+		      far_events++;
 		    }
-		}
+		  }
 	    }
 	}
-      cout<<"Channel "<<i+1<<" near events are "<<near_event[i]<<" and far events are "<<far_event[i]<<endl;
+      //cout<<"Channel "<<i+1<<" near events are "<<near_event[i]<<" and far events are "<<far_event[i]<<endl;
+      cout<<"Channel "<<i+1<<" near events are "<<near_events<<" and far events are "<<far_events<<endl;
+      near_events=0;
+      far_events=0;
     }
 
   return 0;
