@@ -1,3 +1,11 @@
+//********************************************************************************************
+//
+// Macro to get counts of "near" and "far" events for a dataset. Uses text file containing chan// nel "near" and "far" pairs and super reduced CUORE production files. 
+// author: Vivek Sharma
+// date: 2022-04-14
+//
+// *******************************************************************************************
+
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
@@ -85,7 +93,7 @@ int main(int argc, char* argv[]){
   int numEntries = ch.GetEntries();
   cout<<"Number of entries are "<<numEntries<<endl;
   string fname;
-  fname = "channel_pairs.csv";
+  fname = "channel_pairs.txt";
   
   vector<vector<string> > content;
   vector<string> row;

@@ -1,0 +1,3 @@
+#!/bin/bash
+#SBATCH --nodes=4
+srun ./get_event_data
