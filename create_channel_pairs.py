@@ -1,7 +1,9 @@
-#loop over channels
-#get near and far tower, column of channel
-#convert (near, far) tower, column to (near, far) channel
-#create entry like: channel, near channel, far channel
+'''
+loop over channels
+get near and far tower, column of channel
+convert (near, far) tower, column to (near, far) channel
+create entry like: channel, near channel, far channel
+'''
 
 import pandas as pd
 
