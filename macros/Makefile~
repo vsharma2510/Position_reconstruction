@@ -1,0 +1,10 @@
+all: GetEventCounts
+CC=g++
+CFLAGS= -g -Wall `root-config --cflags`
+LDFLAGS= `root-config --libs`
+
+GetEventCounts: GetEventCounts.cpp
+	$(CC) GetEventCounts.cpp $(CFLAGS) $(LDFLAGS) -o GetEventCounts.cpp
+
+clean:
+	rm ./GetEventCounts

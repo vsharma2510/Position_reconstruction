@@ -1,6 +1,6 @@
 //********************************************************************************************
 //
-// Macro to get counts of "near" and "far" events for a dataset. Uses text file containing chan// nel "near" and "far" pairs and super reduced CUORE production files. 
+// Macro to get counts of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and super reduced CUORE production files. 
 // author: Vivek Sharma
 // date: 2022-04-14
 //
@@ -45,11 +45,10 @@
 #include "QCalibrationResiduals.hh"
 
 using namespace std;
-using namespace Cuore;
 
 int main(int argc, char* argv[]){
 
-  int dataset = 3615;
+  int dataset = stoi(argv[1]);
 
   TString dir = "/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/super_reduced/";
   TString filename_bkg,filename_cal;
