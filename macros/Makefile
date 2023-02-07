@@ -4,7 +4,7 @@ CFLAGS= -g -Wall `diana-config --cflags`
 LDFLAGS= `diana-config --libs`
 
 GetEventCounts: GetEventCounts.cpp
-	$(CC) GetEventCounts.cpp $(CFLAGS) $(LDFLAGS) -o GetEventCounts.cpp
+	$(CC) GetEventCounts.cpp $(CFLAGS) $(LDFLAGS) -o GetEventCounts
 
 clean:
 	rm ./GetEventCounts
