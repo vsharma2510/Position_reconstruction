@@ -78,7 +78,7 @@ int main(int argc, char* argv[]){
   //if(nAdded1==0){cout<<"Could not add files"<<endl;}
 
   int tree_channel, multiplicity;
-  double energy;
+  double energy, baselineSlope, riseTime, decayTime, delay, TVL, TVR;
   //int channelV [2];
   int *channelV = new int [988]; 
 
@@ -88,6 +88,12 @@ int main(int argc, char* argv[]){
   ch.SetBranchAddress("Multiplicity", &multiplicity);
   //ch.SetBranchAddress("ChannelV", &channelV);
   ch.SetBranchAddress("ChannelV", channelV);
+  ch.SetBranchAddress("fNormBaselineSlope", &baselineSlope);
+  ch.SetBranchAddress("fNormRiseTime", &riseTime);
+  ch.SetBranchAddress("fNormDecayTime", &decayTime);
+  ch.SetBranchAddress("fNormDelay", &delay);
+  ch.SetBranchAddress("fNormTVL", &TVL);
+  ch.SetBranchAddress("fNormTVR", &TVR);
 
   int numEntries = ch.GetEntries();
   cout<<"Number of entries are "<<numEntries<<endl;
@@ -102,15 +108,15 @@ int main(int argc, char* argv[]){
   if(file.is_open())
     {
       while(getline(file, line))
-	{
-	  row.clear();
-	  
-	  stringstream str(line);
-	  
-	  while(getline(str, word, ','))
-	    row.push_back(word);
-	  content.push_back(row);
-	}
+	    {
+	      row.clear();	  
+	      stringstream str(line);
+	      while(getline(str, word, ','))
+          {
+	        row.push_back(word);
+          }
+	      content.push_back(row);
+	    }
     }
   else
     cout<<"Could not open the file\n";
@@ -121,32 +127,43 @@ int main(int argc, char* argv[]){
   int near_events=0;
   int far_events=0;
 
+  TTree* outTree = new TTree("outputTree", "outputTree");
+  outTree->Branch("channel", &channel);
+  outTree->Branch("nearChannel", &near_channel);
+  outTree->Branch("farChannel", &far_channel);
+  outTree->Branch("riseTime", &riseTime);
+  outTree->Branch("decayTime", &decayTime);
+  outTree->Branch("delay", &delay);
+  outTree->Branch("TVL", &TVL);
+  outTree->Branch("TVR", &TVR);
+
   for(int i=0;i<989;i++)
     {
       channel = stoi(content[i][0]);
       near_channel = stoi(content[i][1]);
       far_channel = stoi(content[i][2]);
-
       cout<<"Working on set "<<channel<<" "<<near_channel<<" "<<far_channel<<endl;
+
       for(int e=0;e<numEntries;e++)
-	{
-	  ch.GetEntry(e);
-	  //cout<<"Working on tree_channel "<<tree_channel<<" multiplicity "<<multiplicity<<" energy "<<energy<<endl;
-	  if(multiplicity==2)
-	    {
-	      if(energy>5000 || energy<200) //TODO: Better way to check for alpha events
-		{
-		  if(channel==tree_channel && channelV[1]==near_channel)
-		    {
-		      near_events++;
-		    }
-		  if(channel==tree_channel && channelV[1]==far_channel)
-		    {
-		      far_events++;
-		    }
-		  }
-	    }
-	}
+	      {
+	        ch.GetEntry(e);
+	        //cout<<"Working on tree_channel "<<tree_channel<<" multiplicity "<<multiplicity<<" energy "<<energy<<endl;
+	        if(multiplicity==2)
+	          {
+	            if(energy<6000 || energy>3000) //TODO: Better way to check for alpha events
+		            {
+                  outTree->Fill();
+		              if(channel==tree_channel && channelV[1]==near_channel)
+		                {
+		                  near_events++;
+		                }
+		              if(channel==tree_channel && channelV[1]==far_channel)
+		                {
+		                  far_events++;
+		                }
+		            }
+	          }
+	      }
       //cout<<"Channel "<<i+1<<" near events are "<<near_event[i]<<" and far events are "<<far_event[i]<<endl;
       cout<<"Channel "<<i+1<<" near events are "<<near_events<<" and far events are "<<far_events<<endl;
       near_events=0;
