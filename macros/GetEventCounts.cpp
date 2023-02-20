@@ -70,14 +70,14 @@ int main(int argc, char* argv[]){
   //TODO: Figure out how to combine cal and bkg files
 
   filename_bkg.Form("%s/SuperReduced_Background_NoPCACut_ds%d.root",dir.Data(),dataset);
-  filename_cal.Form("%s/SuperReduced_Calibration_NoPCACut_ds%d.root",dir.Data(),dataset);
+  //filename_cal.Form("%s/SuperReduced_Calibration_NoPCACut_ds%d.root",dir.Data(),dataset);
   int nAdded1 = ch.Add(filename_bkg.Data());
-  int nAdded2 = ch.Add(filename_cal.Data());
+  //int nAdded2 = ch.Add(filename_cal.Data());
 
-  if(nAdded1==0 || nAdded2==0){cout<<"Could not add files"<<endl;}
+  if(nAdded1==0){cout<<"Could not add files"<<endl;}
   //if(nAdded1==0){cout<<"Could not add files"<<endl;}
 
-  int tree_channel, multiplicity;
+  int tree_channel, multiplicity, nearEvents, farEvents;
   double energy, baselineSlope, riseTime, decayTime, delay, TVL, TVR;
   //int channelV [2];
   int *channelV = new int [988]; 
@@ -136,6 +136,11 @@ int main(int argc, char* argv[]){
   outTree->Branch("delay", &delay);
   outTree->Branch("TVL", &TVL);
   outTree->Branch("TVR", &TVR);
+  
+  TTree* countsTree = new TTree("countsTree", "countsTree");
+  countsTree->Branch("channel", &channel);
+  countsTree->Branch("nearEvents", &nearEvents);
+  countsTree->Branch("farEvents", &farEvents);
 
   for(int i=0;i<989;i++)
     {
@@ -165,10 +170,18 @@ int main(int argc, char* argv[]){
 	          }
 	      }
       //cout<<"Channel "<<i+1<<" near events are "<<near_event[i]<<" and far events are "<<far_event[i]<<endl;
+      countsTree->Fill();
       cout<<"Channel "<<i+1<<" near events are "<<near_events<<" and far events are "<<far_events<<endl;
       near_events=0;
       far_events=0;
     }
+
+  TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
+  TFile* outFile = TFile::Open(outString);
+  outFile->cd();
+  outFile->Write("outTree");
+  outFile->Write("countsTree");
+  outFile->Close();
 
   return 0;
 }
