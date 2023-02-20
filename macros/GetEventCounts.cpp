@@ -1,6 +1,6 @@
 //********************************************************************************************
 //
-// Macro to get counts of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and super reduced CUORE production files. 
+// Macro to get counts and info of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and super reduced CUORE production files. 
 // author: Vivek Sharma
 // date: 2022-04-14
 //
