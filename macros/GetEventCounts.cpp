@@ -83,7 +83,7 @@ int main(int argc, char* argv[]){
   int *channelV = new int [988]; 
 
   TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
-  TFile* outFile = TFile::Open(outString);
+  TFile* outFile = TFile::Open(outString, "RECREATE");
 
   //Accessing tree branches
   ch.SetBranchAddress("Channel", &tree_channel);
