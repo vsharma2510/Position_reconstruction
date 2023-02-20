@@ -79,24 +79,29 @@ int main(int argc, char* argv[]){
 
   int tree_channel, multiplicity, nearEvents, farEvents;
   double energy, baselineSlope, riseTime, decayTime, delay, TVL, TVR;
+  Bool_t IsNear;
+  int nearEventArr[988] = {0};
+  int farEventArr[988] = {0};
+
   //int channelV [2];
   int *channelV = new int [988]; 
 
   TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
-  TFile* outFile = TFile::Open(outString,"RECREATE");
+  TFile* outFile = TFile::Open(outString, "RECREATE");
 
   //Accessing tree branches
-  ch.SetBranchAddress("Channel", &tree_channel);
-  ch.SetBranchAddress("TotalEnergy", &energy);
-  ch.SetBranchAddress("Multiplicity", &multiplicity);
+  ch.SetBranchAddress("Channel", &tree_channel); // Main channel of event
+  ch.SetBranchAddress("TotalEnergy", &energy); // Total energy of the whole multiplet
+  ch.SetBranchAddress("Multiplicity", &multiplicity); // Multiplicity of event
   //ch.SetBranchAddress("ChannelV", &channelV);
-  ch.SetBranchAddress("ChannelV", channelV);
+  ch.SetBranchAddress("ChannelV", channelV); // Vector of channels in the multiplet
   ch.SetBranchAddress("fNormBaselineSlope", &baselineSlope);
   ch.SetBranchAddress("fNormRiseTime", &riseTime);
   ch.SetBranchAddress("fNormDecayTime", &decayTime);
   ch.SetBranchAddress("fNormDelay", &delay);
   ch.SetBranchAddress("fNormTVL", &TVL);
   ch.SetBranchAddress("fNormTVR", &TVR);
+  ch.SetBranchAddress("IsNear", &IsNear);
 
   int numEntries = ch.GetEntries();
   cout<<"Number of entries are "<<numEntries<<endl;
@@ -132,8 +137,8 @@ int main(int argc, char* argv[]){
 
   TTree* outTree = new TTree("outputTree", "outputTree");
   outTree->Branch("channel", &channel);
-  outTree->Branch("nearChannel", &near_channel);
-  outTree->Branch("farChannel", &far_channel);
+  //outTree->Branch("nearChannel", &near_channel);
+  //outTree->Branch("farChannel", &far_channel);
   outTree->Branch("riseTime", &riseTime);
   outTree->Branch("decayTime", &decayTime);
   outTree->Branch("delay", &delay);
@@ -145,42 +150,70 @@ int main(int argc, char* argv[]){
   countsTree->Branch("nearEvents", &nearEvents);
   countsTree->Branch("farEvents", &farEvents);
 
-  for(int i=0;i<989;i++)
+  /* for(int i=0;i<989;i++)
     {
       channel = stoi(content[i][0]);
       near_channel = stoi(content[i][1]);
       far_channel = stoi(content[i][2]);
-      cout<<"Working on set "<<channel<<" "<<near_channel<<" "<<far_channel<<endl;
+      cout<<"Working on set "<<channel<<" "<<near_channel<<" "<<far_channel<<endl; */
 
-      for(int e=0;e<numEntries;e++)
-	      {
-	        ch.GetEntry(e);
-	        //cout<<"Working on tree_channel "<<tree_channel<<" multiplicity "<<multiplicity<<" energy "<<energy<<endl;
-	        if(multiplicity==2)
-	          {
-	            if(energy<6000 || energy>3000) //TODO: Better way to check for alpha events
-		            {
-                  outTree->Fill();
-		              if(channel==tree_channel && channelV[1]==near_channel)
-		                {
-		                  near_events++;
-		                }
-		              if(channel==tree_channel && channelV[1]==far_channel)
-		                {
-		                  far_events++;
-		                }
-		            }
-	          }
-	      }
+  for(int e=0;e<numEntries;e++)
+	    {
+	      ch.GetEntry(e);
+	      //cout<<"Working on tree_channel "<<tree_channel<<" multiplicity "<<multiplicity<<" energy "<<energy<<endl;
+	      if(multiplicity==2)
+	        {
+	          if(energy<6000 || energy>3000) //TODO: Better way to check for alpha events
+		          {
+                //outTree->Fill();
+                for(int i=0;i<988;i++)
+                {
+                  // Checking if channel pair is a near channel pair and counting it if so
+                  if(tree_channel == stoi(content[i][0]) && channelV[1] == stoi(content[i][1]))
+                  {
+                    IsNear = 1;
+                    nearEventArr[tree_channel-1]++;
+                  }
+
+                  // Checking if channel pair is a far channel pair and counting it if so
+                  if(tree_channel == stoi(content[i][0]) && channelV[1] == stoi(content[i][2]))
+                  {
+                    IsNear = 0;
+                    farEventArr[tree_channel-1]++;
+                  }
+                }
+
+                // Filling tree with relevant variables
+                outTree->Fill();
+                
+		            /*if(channel==tree_channel && channelV[1]==near_channel)
+		              {
+		                near_events++;
+		              }
+		            if(channel==tree_channel && channelV[1]==far_channel)
+		              {
+		                far_events++;
+		              }*/
+		          }
+	        }
+	    }
       //cout<<"Channel "<<i+1<<" near events are "<<near_event[i]<<" and far events are "<<far_event[i]<<endl;
-      countsTree->Fill();
-      cout<<"Channel "<<i+1<<" near events are "<<near_events<<" and far events are "<<far_events<<endl;
-      near_events=0;
-      far_events=0;
-    }
+      //countsTree->Fill();
+      //cout<<"Channel "<<i+1<<" near events are "<<near_events<<" and far events are "<<far_events<<endl;
+      //near_events=0;
+      //far_events=0;
 
   //TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
   //TFile* outFile = TFile::Open(outString);
+
+  for(int i=0;i<988;i++)
+  {
+    channel = stoi(content[i][0]);
+    nearEvents = nearEventArr[channel-1];
+    farEvents = farEventArr[channel-1];
+    countsTree->Fill();
+  }
+
   outFile->cd();
   outFile->Write("outTree");
   outFile->Write("countsTree");
