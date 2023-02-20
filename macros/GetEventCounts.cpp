@@ -28,6 +28,8 @@
 #include <TPad.h>
 #include <chrono>
 
+#include "QChain.hh"
+
 using namespace std;
 
 int main(int argc, char* argv[]){
