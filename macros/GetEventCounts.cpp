@@ -184,7 +184,7 @@ int main(int argc, char* argv[]){
 	        }
 	    }
   auto stop = chrono::high_resolution_clock::now();
-  auto duration = chrono::duration_cast<seconds>(stop - start);
+  auto duration = chrono::duration_cast(stop - start);
   cout<<"Reading time "<< duration.count() <<endl;
       //cout<<"Channel "<<i+1<<" near events are "<<near_event[i]<<" and far events are "<<far_event[i]<<endl;
       //countsTree->Fill();
