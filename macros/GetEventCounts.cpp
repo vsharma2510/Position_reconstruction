@@ -82,6 +82,9 @@ int main(int argc, char* argv[]){
   //int channelV [2];
   int *channelV = new int [988]; 
 
+  TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
+  TFile* outFile = TFile::Open(outString);
+
   //Accessing tree branches
   ch.SetBranchAddress("Channel", &tree_channel);
   ch.SetBranchAddress("TotalEnergy", &energy);
@@ -176,8 +179,8 @@ int main(int argc, char* argv[]){
       far_events=0;
     }
 
-  TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
-  TFile* outFile = TFile::Open(outString);
+  //TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
+  //TFile* outFile = TFile::Open(outString);
   outFile->cd();
   outFile->Write("outTree");
   outFile->Write("countsTree");
