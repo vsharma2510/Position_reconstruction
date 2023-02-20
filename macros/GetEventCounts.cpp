@@ -26,23 +26,7 @@
 #include <TGraphErrors.h>
 #include <TGraphAsymmErrors.h>
 #include <TPad.h>
-
-
-#include "QCuore.hh"
-#include "QError.hh"
-#include "QObject.hh"
-#include "QGlobalHandle.hh"
-#include "QMessage.hh"
-#include "QGlobalDataManager.hh"
-#include "QDetChannelCollectionHandle.hh"
-#include "QDetChannelCollection.hh"
-#include "QHeader.hh"
-#include "QPulseInfo.hh"
-#include "QChain.hh"
-#include "QTObject.hh"
-#include "QTObjectHandle.hh"
-#include "QCalibrationParametersHandle.hh"
-#include "QCalibrationResiduals.hh"
+#include <chrono>
 
 using namespace std;
 
@@ -157,6 +141,8 @@ int main(int argc, char* argv[]){
       far_channel = stoi(content[i][2]);
       cout<<"Working on set "<<channel<<" "<<near_channel<<" "<<far_channel<<endl; */
 
+  cout<<"Reading data tree"<<endl;
+  auto start = chrono::high_resolution_clock::now();
   for(int e=0;e<numEntries;e++)
 	    {
 	      ch.GetEntry(e);
@@ -185,7 +171,7 @@ int main(int argc, char* argv[]){
 
                 // Filling tree with relevant variables
                 outTree->Fill();
-                
+
 		            /*if(channel==tree_channel && channelV[1]==near_channel)
 		              {
 		                near_events++;
@@ -197,6 +183,8 @@ int main(int argc, char* argv[]){
 		          }
 	        }
 	    }
+  auto stop = chrono::high_resolution_clock::now();
+  cout<<"Reading time "<< chrono::duration_cast<seconds>(stop-start)<<endl;
       //cout<<"Channel "<<i+1<<" near events are "<<near_event[i]<<" and far events are "<<far_event[i]<<endl;
       //countsTree->Fill();
       //cout<<"Channel "<<i+1<<" near events are "<<near_events<<" and far events are "<<far_events<<endl;
