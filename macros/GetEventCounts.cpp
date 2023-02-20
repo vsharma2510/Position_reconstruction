@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
   int dataset = stoi(argv[1]);
 
   TString dir = "/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/super_reduced/";
-  TString filename_bkg,filename_cal;
+  TString filename_bkg;
   //int runs [58];
   QChain ch("qredtree");
   /*for(int i=0;i<58;i++)
@@ -181,10 +181,10 @@ int main(int argc, char* argv[]){
 
   //TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
   //TFile* outFile = TFile::Open(outString);
-  outFile->cd();
-  outFile->Write("outTree");
-  outFile->Write("countsTree");
-  outFile->Close();
+  //outFile->cd();
+  //outFile->Write("outTree");
+  //outFile->Write("countsTree");
+  //outFile->Close();
 
   return 0;
 }
