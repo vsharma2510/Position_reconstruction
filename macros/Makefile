@@ -1,10 +1,10 @@
-all: GetEventCounts
+all: GetEventCountsReduced
 CC=g++
 CFLAGS= -g -Wall `diana-config --cflags`
 LDFLAGS= `diana-config --libs`
 
-GetEventCounts: GetEventCounts.cpp
-	$(CC) GetEventCounts.cpp $(CFLAGS) $(LDFLAGS) -o GetEventCounts
+GetEventCountsReduced: GetEventCountsReduced.cpp
+	$(CC) GetEventCountsReduced.cpp $(CFLAGS) $(LDFLAGS) -o GetEventCountsReduced
 
 clean:
-	rm ./GetEventCounts
+	rm ./GetEventCountsReduced
