@@ -1,7 +1,6 @@
 //********************************************************************************************
 //
-// Macro to get counts and info of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and super reduced CUORE production files.
-// Currently written to be run on CNAF
+// Macro to get counts and info of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and CUORE production files.
 // Command line inputs: dataset
 // author: Vivek Sharma
 // date: 2022-04-14
@@ -38,7 +37,7 @@ int main(int argc, char* argv[]){
 
   int dataset = stoi(argv[1]);
 
-  TString dir = "/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/super_reduced/";
+  TString dir = Form("/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/output/ds%d/", dataset);
   TString filename_bkg;
   //int runs [58];
   QChain ch("qredtree");
