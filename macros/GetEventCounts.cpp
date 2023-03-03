@@ -1,6 +1,7 @@
 //********************************************************************************************
 //
-// Macro to get counts and info of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and super reduced CUORE production files. 
+// Macro to get counts and info of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and super reduced CUORE production files.
+// Command line inputs: dataset
 // author: Vivek Sharma
 // date: 2022-04-14
 //
@@ -72,7 +73,7 @@ int main(int argc, char* argv[]){
   //int channelV [2];
   int *channelV = new int [988]; 
 
-  TString outString = Form("ds%d_M2_3_6_MeV.root", dataset);
+  TString outString = Form("../output/ds%d_M2_3_6_MeV.root", dataset);
   TFile* outFile = TFile::Open(outString, "RECREATE");
 
   //Accessing tree branches
@@ -87,7 +88,7 @@ int main(int argc, char* argv[]){
   ch.SetBranchAddress("fNormDelay", &delay);
   ch.SetBranchAddress("fNormTVL", &TVL);
   ch.SetBranchAddress("fNormTVR", &TVR);
-  ch.SetBranchAddress("IsNear", &IsNear);
+  //ch.SetBranchAddress("IsNear", &IsNear);
 
   int numEntries = ch.GetEntries();
   cout<<"Number of entries are "<<numEntries<<endl;
@@ -122,7 +123,7 @@ int main(int argc, char* argv[]){
   int far_events=0;
 
   TTree* outTree = new TTree("outputTree", "outputTree");
-  outTree->Branch("channel", &channel);
+  outTree->Branch("channel", &tree_channel);
   //outTree->Branch("nearChannel", &near_channel);
   //outTree->Branch("farChannel", &far_channel);
   outTree->Branch("riseTime", &riseTime);
@@ -130,6 +131,7 @@ int main(int argc, char* argv[]){
   outTree->Branch("delay", &delay);
   outTree->Branch("TVL", &TVL);
   outTree->Branch("TVR", &TVR);
+  outTree->Branch("IsNear", &IsNear);
   
   TTree* countsTree = new TTree("countsTree", "countsTree");
   countsTree->Branch("channel", &channel);
@@ -161,6 +163,8 @@ int main(int argc, char* argv[]){
                   {
                     IsNear = 1;
                     nearEventArr[tree_channel-1]++;
+		    outTree->Fill();
+		    continue;
                   }
 
                   // Checking if channel pair is a far channel pair and counting it if so
@@ -168,11 +172,10 @@ int main(int argc, char* argv[]){
                   {
                     IsNear = 0;
                     farEventArr[tree_channel-1]++;
+		    outTree->Fill();
+		    continue;
                   }
                 }
-
-                // Filling tree with relevant variables
-                outTree->Fill();
 
 		            /*if(channel==tree_channel && channelV[1]==near_channel)
 		              {
@@ -186,8 +189,9 @@ int main(int argc, char* argv[]){
 	        }
 	    }
   auto stop = chrono::high_resolution_clock::now();
-  auto duration = chrono::duration_cast(stop - start);
-  cout<<"Reading time "<< duration.count() <<endl;
+  std::chrono::duration<double, std::milli> runtime = stop - start;
+  
+  cout<<"Reading time was "<< runtime.count()/1000.0<<" seconds"<<endl;
       //cout<<"Channel "<<i+1<<" near events are "<<near_event[i]<<" and far events are "<<far_event[i]<<endl;
       //countsTree->Fill();
       //cout<<"Channel "<<i+1<<" near events are "<<near_events<<" and far events are "<<far_events<<endl;
