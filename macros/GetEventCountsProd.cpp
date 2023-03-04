@@ -33,35 +33,46 @@
 
 using namespace std;
 
+std::vector<int> GetRuns(dataset)
+  {
+    QDb::QDbTable table; 
+    QCuoreDb *db = QCuoreDb::Get();
+    TString tQuery = Form("SELECT r.run_number FROM runs AS r, data_sets_runs AS d, runs as s WHERE r.run_number=d.run_number AND r.run_type='Reprocess' AND s.run_number=r.source_run AND s.run_type='Background' AND d.data_set=%d ORDER by r.source_run;", dataset);
+    string query(tQuery.Data());
+    db->DoQuery(query, table);
+    //TChain* qC = new TChain("qtree");
+    std::vector<int> runVector;
+    if(!table["run_number"].empty()) 
+      {
+      for (unsigned int i = 0; i < table["run_number"].size(); ++i) 
+        {
+          runVector.push_back(table["run_number"][i].GetInt());
+          cout<<"Adding "<<run_number<<endl;
+        }
+      }
+  }
+
 int main(int argc, char* argv[]){
 
   int dataset = stoi(argv[1]);
-
-  TString dir = Form("/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/output/ds%d/", dataset);
-  TString filename_bkg;
-  //int runs [58];
+  //TString dir = Form("/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/output/ds%d/", dataset);
+  //TString filename_bkg;
+  std::vector<int> runVector;
+  runVector = GetRuns(dataset);
   QChain ch("qredtree");
-  /*for(int i=0;i<58;i++)
+
+  for(std::vector<int>::iterator it = runVector.begin(); it != runVector.end(); ++it)
     {
-      cout<<"Working on run "<<351032+i<<endl;
-      for(int j=1;j<20;j++)
-	{
-	  listname.Form("%s/ds%d/FinalizedReduced_%d_%.3d_R.list", dir.Data(), dataset, 351032+i, j);
-	}
-      cout<<"Working on file "<<listname.Data()<<endl;
-      int nAdded = ch.Add(listname.Data());
-      if(nAdded==0){cout<<"nAdded did not work"<<endl;exit(1);}
+      TString dir = Form("/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/output/ds%d/Production_%d_R.list", dataset, (*it));
+      ch->Add(dir.Data());    
+    }
       
-      }*/
-
-  //TODO: Figure out how to combine cal and bkg files
-
-  filename_bkg.Form("%s/SuperReduced_Background_NoPCACut_ds%d.root",dir.Data(),dataset);
+  //filename_bkg.Form("%s/SuperReduced_Background_NoPCACut_ds%d.root",dir.Data(),dataset);
   //filename_cal.Form("%s/SuperReduced_Calibration_NoPCACut_ds%d.root",dir.Data(),dataset);
-  int nAdded1 = ch.Add(filename_bkg.Data());
+  //int nAdded1 = ch.Add(filename_bkg.Data());
   //int nAdded2 = ch.Add(filename_cal.Data());
 
-  if(nAdded1==0){cout<<"Could not add files"<<endl;}
+  //if(nAdded1==0){cout<<"Could not add files"<<endl;}
   //if(nAdded1==0){cout<<"Could not add files"<<endl;}
 
   int tree_channel, multiplicity, nearEvents, farEvents;
@@ -75,6 +86,9 @@ int main(int argc, char* argv[]){
 
   TString outString = Form("../output/ds%d_M2_3_6_MeV.root", dataset);
   TFile* outFile = TFile::Open(outString, "RECREATE");
+
+  ch->SetbranchStatus("*", 0);
+  ch->SetBranchStatus("DAQ@Pulse.fFiller.fChannel", 1);
 
   //Accessing tree branches
   ch.SetBranchAddress("Channel", &tree_channel); // Main channel of event
@@ -213,7 +227,7 @@ int main(int argc, char* argv[]){
   outFile->Write("outTree");
   outFile->Write("countsTree");
   outFile->Close();
-
+  
   return 0;
 }
 
