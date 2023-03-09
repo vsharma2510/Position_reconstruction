@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../TriProtonDecay"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.cpp": "cpp",
+			"GetPulsesFromFile.C": "cpp",
+			"GetPulses.C": "cpp"
+		}
+	}
+}

@@ -1,11 +1,14 @@
+/*
 //********************************************************************************************
 //
-// Macro to get counts and info of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and CUORE production files.
+// Macro to get counts and info of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and 
+CUORE production files.
 // Command line inputs: dataset
 // author: Vivek Sharma
 // date: 2022-04-14
 //
 // *******************************************************************************************
+*/
 
 #include <iostream>
 #include <fstream>
@@ -30,17 +33,27 @@
 #include <chrono>
 
 #include "QChain.hh"
+#include "QPulseInfo.hh"
+#include "QCuoreDb.hh"
+#include "QChain.hh"
+#include "QPulse.hh"
+#include "QVector.hh"
+#include "QHeader.hh"
 
 using namespace std;
 
-std::vector<int> GetRuns(dataset)
+std::vector<int> GetRuns(int dataset)
   {
+    // Accessing database
     QDb::QDbTable table; 
     QCuoreDb *db = QCuoreDb::Get();
-    TString tQuery = Form("SELECT r.run_number FROM runs AS r, data_sets_runs AS d, runs as s WHERE r.run_number=d.run_number AND r.run_type='Reprocess' AND s.run_number=r.source_run AND s.run_type='Background' AND d.data_set=%d ORDER by r.source_run;", dataset);
+    TString tQuery = Form("SELECT r.run_number FROM runs AS r, data_sets_runs AS d, runs as s WHERE r.run_number=d.run_number AND 
+    r.run_type='Reprocess' AND s.run_number=r.source_run AND s.run_type='Background' AND d.data_set=%d ORDER by r.source_run;", dataset);
     string query(tQuery.Data());
+    // Getting list of background runs for dataset
     db->DoQuery(query, table);
     //TChain* qC = new TChain("qtree");
+    // Storing run numbers in vector
     std::vector<int> runVector;
     if(!table["run_number"].empty()) 
       {
@@ -57,13 +70,16 @@ int main(int argc, char* argv[]){
   int dataset = stoi(argv[1]);
   //TString dir = Form("/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/output/ds%d/", dataset);
   //TString filename_bkg;
+
+  // Getting list of run numbers and storing them in vector
   std::vector<int> runVector;
   runVector = GetRuns(dataset);
-  QChain ch("qredtree");
+  QChain ch("qtree");
 
+  // Adding list files to QChain
   for(std::vector<int>::iterator it = runVector.begin(); it != runVector.end(); ++it)
     {
-      TString dir = Form("/project/projectdirs/cuore/syncData/CUORE/OfficialProcessed/ReproSpring20/output/ds%d/Production_%d_R.list", dataset, (*it));
+      TString dir = Form("/nfs/cuore7/data/CUORE/OfficialProcessed/ReproSpring20/output/ds%d/Production_%d_R.list", dataset, (*it));
       ch->Add(dir.Data());    
     }
       
@@ -77,7 +93,8 @@ int main(int argc, char* argv[]){
 
   int tree_channel, multiplicity, nearEvents, farEvents;
   double energy, baselineSlope, riseTime, decayTime, delay, TVL, TVR;
-  Bool_t IsNear;
+  QPulseInfo* pi = 0;
+  Bool_t isNear, isSignal;
   int nearEventArr[988] = {0};
   int farEventArr[988] = {0};
 
@@ -87,11 +104,13 @@ int main(int argc, char* argv[]){
   TString outString = Form("../output/ds%d_M2_3_6_MeV.root", dataset);
   TFile* outFile = TFile::Open(outString, "RECREATE");
 
-  ch->SetbranchStatus("*", 0);
-  ch->SetBranchStatus("DAQ@Pulse.fFiller.fChannel", 1);
+  ch->SetBranchStatus("*", 0);
+  ch->SetBranchStatus("DAQ@PulseInfo.*", 1);
+  ch->SetBranchStatus()
 
   //Accessing tree branches
-  ch.SetBranchAddress("Channel", &tree_channel); // Main channel of event
+  ch.SetBranchAddress("DAQ@PulseInfo.", &pi);
+  //ch.SetBranchAddress("Channel", &tree_channel); // Main channel of event
   ch.SetBranchAddress("TotalEnergy", &energy); // Total energy of the whole multiplet
   ch.SetBranchAddress("Multiplicity", &multiplicity); // Multiplicity of event
   //ch.SetBranchAddress("ChannelV", &channelV);
@@ -102,7 +121,7 @@ int main(int argc, char* argv[]){
   ch.SetBranchAddress("fNormDelay", &delay);
   ch.SetBranchAddress("fNormTVL", &TVL);
   ch.SetBranchAddress("fNormTVR", &TVR);
-  //ch.SetBranchAddress("IsNear", &IsNear);
+  //ch.SetBranchAddress("isNear", &isNear);
 
   int numEntries = ch.GetEntries();
   cout<<"Number of entries are "<<numEntries<<endl;
@@ -145,7 +164,7 @@ int main(int argc, char* argv[]){
   outTree->Branch("delay", &delay);
   outTree->Branch("TVL", &TVL);
   outTree->Branch("TVR", &TVR);
-  outTree->Branch("IsNear", &IsNear);
+  outTree->Branch("isNear", &isNear);
   
   TTree* countsTree = new TTree("countsTree", "countsTree");
   countsTree->Branch("channel", &channel);
@@ -175,7 +194,7 @@ int main(int argc, char* argv[]){
                   // Checking if channel pair is a near channel pair and counting it if so
                   if(tree_channel == stoi(content[i][0]) && channelV[1] == stoi(content[i][1]))
                   {
-                    IsNear = 1;
+                    isNear = 1;
                     nearEventArr[tree_channel-1]++;
 		    outTree->Fill();
 		    continue;
@@ -184,7 +203,7 @@ int main(int argc, char* argv[]){
                   // Checking if channel pair is a far channel pair and counting it if so
                   if(tree_channel == stoi(content[i][0]) && channelV[1] == stoi(content[i][2]))
                   {
-                    IsNear = 0;
+                    isNear = 0;
                     farEventArr[tree_channel-1]++;
 		    outTree->Fill();
 		    continue;
