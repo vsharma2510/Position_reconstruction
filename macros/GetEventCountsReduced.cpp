@@ -156,7 +156,7 @@ int main(int argc, char* argv[]){
 	      //cout<<"Working on tree_channel "<<tree_channel<<" multiplicity "<<multiplicity<<" energy "<<energy<<endl;
 	      if(multiplicity==2)
 	        {
-	          if(energy<energyMax || energy>energyMin) //TODO: Better way to check for alpha events
+	          if(energy<energyMax && energy>energyMin) //TODO: Better way to check for alpha events
 		          {
                 //outTree->Fill();
                 for(int i=0;i<988;i++)
