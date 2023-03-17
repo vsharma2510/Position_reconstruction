@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
 
   //Accessing tree branches
   ch.SetBranchAddress("Channel", &tree_channel); // Main channel of event
-  ch.SetBranchAddress("TotalEnergy", &energy); // Total energy of the whole multiplet
+  ch.SetBranchAddress("Energy", &energy); // Total energy of the whole multiplet
   ch.SetBranchAddress("Multiplicity", &multiplicity); // Multiplicity of event
   //ch.SetBranchAddress("ChannelV", &channelV);
   ch.SetBranchAddress("ChannelV", channelV); // Vector of channels in the multiplet
@@ -147,6 +147,8 @@ int main(int argc, char* argv[]){
       cout<<"Working on set "<<channel<<" "<<near_channel<<" "<<far_channel<<endl; */
 
   cout<<"Reading data tree"<<endl;
+  double energyMin = 3000;
+  double energyMax = 6000;
   auto start = chrono::high_resolution_clock::now();
   for(int e=0;e<numEntries;e++)
 	    {
@@ -154,7 +156,7 @@ int main(int argc, char* argv[]){
 	      //cout<<"Working on tree_channel "<<tree_channel<<" multiplicity "<<multiplicity<<" energy "<<energy<<endl;
 	      if(multiplicity==2)
 	        {
-	          if(energy<6000 || energy>3000) //TODO: Better way to check for alpha events
+	          if(energy<energyMax || energy>energyMin) //TODO: Better way to check for alpha events
 		          {
                 //outTree->Fill();
                 for(int i=0;i<988;i++)
@@ -164,8 +166,8 @@ int main(int argc, char* argv[]){
                   {
                     IsNear = 1;
                     nearEventArr[tree_channel-1]++;
-		    outTree->Fill();
-		    continue;
+		                outTree->Fill();
+		                continue;
                   }
 
                   // Checking if channel pair is a far channel pair and counting it if so
@@ -173,8 +175,8 @@ int main(int argc, char* argv[]){
                   {
                     IsNear = 0;
                     farEventArr[tree_channel-1]++;
-		    outTree->Fill();
-		    continue;
+		                outTree->Fill();
+		                continue;
                   }
                 }
 
