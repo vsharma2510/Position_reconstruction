@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
 
   //Accessing tree branches
   ch.SetBranchAddress("Channel", &tree_channel); // Main channel of event
-  ch.SetBranchAddress("Energy", &energy); // Total energy of the whole multiplet
+  ch.SetBranchAddress("Energy", &energy); // Energy of the event
   ch.SetBranchAddress("Multiplicity", &multiplicity); // Multiplicity of event
   //ch.SetBranchAddress("ChannelV", &channelV);
   ch.SetBranchAddress("ChannelV", channelV); // Vector of channels in the multiplet
