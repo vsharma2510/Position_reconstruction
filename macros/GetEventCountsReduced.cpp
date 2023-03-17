@@ -74,7 +74,7 @@ int main(int argc, char* argv[]){
   //int channelV [2];
   int *channelV = new int [988]; 
 
-  TString outString = Form("../output/ds%d_M2_3_6_MeV.root", dataset);
+  TString outString = Form("../output/ds%d_M2_3_6_MeV_reduced.root", dataset);
   TFile* outFile = TFile::Open(outString, "RECREATE");
 
   //Accessing tree branches
