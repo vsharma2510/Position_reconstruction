@@ -1,5 +1,5 @@
 /*
-//********************************************************************************************
+********************************************************************************************
 //
 // Macro to get counts and info of "near" and "far" events for a dataset. Uses text file containing channel "near" and "far" pairs and
 CUORE production files.
@@ -7,7 +7,7 @@ CUORE production files.
 // author: Vivek Sharma
 // date: 2022-04-14
 //
-// *******************************************************************************************
+*******************************************************************************************
 */
 
 #include <iostream>
@@ -40,7 +40,7 @@ CUORE production files.
 #include "QVector.hh"
 #include "QHeader.hh"
 #include "QBaselineData.hh"
-#include "QCoincidence.hh"
+//#include "QCoincidence.hh"
 #include "QCoincidenceData.hh"
 #include "QPulseParameters.hh"
 #include "QCountPulsesData.hh"
@@ -50,14 +50,14 @@ CUORE production files.
 #include "QBaseType.hh"
 
 using namespace std;
+using namespace Cuore;
 
 std::vector<int> GetRuns(int dataset)
   {
     // Accessing database
     QDb::QDbTable table;
     QCuoreDb *db = QCuoreDb::Get();
-    TString tQuery = Form("SELECT r.run_number FROM runs AS r, data_sets_runs AS d, runs as s WHERE r.run_number=d.run_number AND
-    r.run_type='Reprocess' AND s.run_number=r.source_run AND s.run_type='Background' AND d.data_set=%d ORDER by r.source_run;", dataset);
+    TString tQuery = Form("SELECT r.run_number FROM runs AS r, data_sets_runs AS d, runs as s WHERE r.run_number=d.run_number AND r.run_type='Reprocess' AND s.run_number=r.source_run AND s.run_type='Background' AND d.data_set=%d ORDER by r.source_run;", dataset);
     string query(tQuery.Data());
     // Getting list of background runs for dataset
     db->DoQuery(query, table);
@@ -69,7 +69,7 @@ std::vector<int> GetRuns(int dataset)
       for (unsigned int i = 0; i < table["run_number"].size(); ++i)
         {
           runVector.push_back(table["run_number"][i].GetInt());
-          cout<<"Adding "<<run_number<<endl;
+          cout<<"Adding "<<table["run_number"][i].GetInt()<<endl;
         }
       }
   }
@@ -206,6 +206,7 @@ int main(int argc, char* argv[]){
   //int far_event [988];
   int near_events=0;
   int far_events=0;
+  int outChannel=0;
 
   TTree* outTree = new TTree("outputTree", "outputTree");
   outTree->Branch("channel", &outChannel);
@@ -245,7 +246,7 @@ int main(int argc, char* argv[]){
       coincVector = coinc->fCoincidentChannels;
 
 	      //cout<<"Working on tree_channel "<<tree_channel<<" multiplicity "<<multiplicity<<" energy "<<energy<<endl;
-	    if(multiplicity==2 && isSignal && rejectBadIntervals && badForAnalysis && singleTrigger && numberOfPulses==1 && energy<6000 && energy>3000)
+	    if(multiplicity==2 && isSignal && rejectBadIntervals && badForAnalysis && singleTrigger && numberOfPulses==1 && Energy<6000 && Energy>3000)
 	      {
           channelV[0] = coincVector[0].fChannelId;
           channelV[1] = coincVector[1].fChannelId;
@@ -262,7 +263,7 @@ int main(int argc, char* argv[]){
                 }
 
               // Checking if channel pair is a far channel pair and counting it if so
-              if(tree_channel == stoi(content[i][0]) && channelV[1] == stoi(content[i][2]))
+              if(treeChannel == stoi(content[i][0]) && channelV[1] == stoi(content[i][2]))
                 {
                   isNear = 0;
                   //farEventArr[tree_channel-1]++;

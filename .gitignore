@@ -2,3 +2,6 @@
 .vscode/cuoresw.code-workspace
 ./output/
 output/M2Ch2_dist.root
+macros/GetEventCountsProd
+macros/GetEventCountsReduced
+macros/test
