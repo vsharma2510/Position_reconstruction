@@ -5,3 +5,4 @@ output/M2Ch2_dist.root
 macros/GetEventCountsProd
 macros/GetEventCountsReduced
 macros/test
+macros/dbTest.cpp
